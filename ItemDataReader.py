@@ -1,7 +1,28 @@
 import os
 import datetime
-import codecs
 
+
+def isInteger(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
+
+
+def checkDataTypes(ItemData):
+
+    if isInteger(ItemData[0]) and isInteger(ItemData[1]) and isInteger(ItemData[2]) and isInteger(ItemData[3]) and isInteger(ItemData[4]) and isInteger(ItemData[5]) and isInteger(ItemData[6]) and isInteger(ItemData[7]) and isInteger(ItemData[8]) and isInteger(ItemData[10]):
+        return True
+    else:
+        return False
+
+
+def checkIfFilesExist(itemdat, itemdatmes1):
+    if os.path.exists(itemdat) and os.path.exists(itemdatmes1):
+        return True
+    else:
+        return False
 
 def checkBackupFolder(selectedDirectory):
     backupFolder = selectedDirectory + '/Backup'
@@ -18,7 +39,7 @@ def createBackupFolder(backupFolderLocation):
 
 def saveFiles(selectedDirectory, ItemNames, ItemData, backup):
     if backup == True:
-        selectedDirectory = selectedDirectory + '/Backup/' + datetime.datetime.now().strftime("%d-%m-%Y_%H|%M|%S")
+        selectedDirectory = selectedDirectory + '/Backup/' + datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         saveItemDataToFile(ItemData, selectedDirectory + '_comdat.cfg')
         saveItemNamesToFile(ItemNames, selectedDirectory + '_comdatmes1.cfg')
     else:
@@ -56,23 +77,6 @@ class ItemData:
             self.data7) + ", " + str(self.spriteIndex) + ", " + str(self.itemModelName) + ", " + str(self.data11))
 
 
-class CombinedItemData:
-    def __init__(self, itemData):
-        self.itemID = int(itemData[0])
-        self.itemName = str(itemData[1])
-        self.itemType = int(itemData[2])
-        self.data3 = int(itemData[3])
-        self.data4 = int(itemData[4])
-        self.maxStackSize = int(itemData[5])
-        self.maxItemCount = int(itemData[6])
-        self.data7 = int(itemData[7])
-        self.data11 = int(itemData[8])
-
-    def printCombinedItemData(self):
-        print(str(self.itemID) + ": " + self.itemName + ", " + str(self.itemType) + ", " + str(self.data3) + ", " + str(
-            self.data4) + ", [" + str(self.maxItemCount) + ", " + str(self.maxStackSize) + "], " + str(
-            self.data7) + ", " + str(self.data11))
-
 
 class ItemDataFileHandler:
     def __init__(self, filename):
@@ -86,7 +90,6 @@ class ItemDataFileHandler:
 
             for line in fileLines:
 
-
                 dataString = str(line)
 
                 itemData = dataString.split(',')
@@ -97,6 +100,13 @@ class ItemDataFileHandler:
                 allItemData.append(ItemData(itemData))
 
             return allItemData
+
+        except(FileNotFoundError):
+            print("Unable to read from file, file not found.")
+
+        except(IndexError):
+            print("Error, itemData not properly split")
+
         except:
             print("Error, file not found")
 
@@ -151,8 +161,14 @@ class ItemNameFileHandler:
 
             return itemNames
 
+        except(FileNotFoundError):
+            print("Unable to read from file, file not found.")
+
+        except(IndexError):
+            print("Error, itemInfo not properly split")
+
         except:
-            print("Error, file not found.")
+            print("Unknown error.")
 
 
 # Will save a list of ItemName objects to a target filename
@@ -172,26 +188,6 @@ def saveItemNamesToFile(itemNames, targetFile):
 
     except:
         print("Error, unable to save to file.")
-
-
-def fillBlanks(itemNames):
-    normalNames = getNormalItemNames(itemNames)
-    sortedNormalNames = sortItemNames(normalNames)
-
-    maxItems = sortedNormalNames[len(sortedNormalNames) - 1].itemNumber
-    for x in range(maxItems):
-        if (x + 1) != sortedNormalNames[x].itemNumber:
-            sortedNormalNames.insert(x, ItemName('MES_SYS', x + 1, '(null)'))
-
-    return sortedNormalNames
-
-
-def getNormalItemNames(itemNames):
-    normalNames = []
-    for x in range(len(itemNames)):
-        if itemNames[x].prefix != 'MES_SYSSPE':
-            normalNames.append(itemNames[x])
-    return normalNames
 
 
 def sortItemNames(itemNames):
@@ -221,39 +217,4 @@ def saveItemName(newName, allNames, itemID):
         if allNames[x].itemNumber == itemID:
             allNames[x].itemName = newName
 
-def combineItemNamesAndData(itemData, itemNames):
-    normalNames = fillBlanks(itemNames)
-
-    combinedData = []
-
-    for x in range(len(itemData)):
-        currentItemData = [itemData[x].itemID, findItemName(itemData[x].itemID, normalNames), itemData[x].itemType,
-                           itemData[x].data3, itemData[x].data4, itemData[x].maxStackSize, itemData[x].maxItemCount,
-                           itemData[x].data7, itemData[x].data11]
-        combinedData.append(CombinedItemData(currentItemData))
-
-    return combinedData
-
-
-def sortCombinedItemData(combinedItems, sortKey):
-    if sortKey == 'itemName':
-        combinedItems.sort(key=lambda x: x.itemName)
-    if sortKey == 'itemType':
-        combinedItems.sort(key=lambda x: x.itemType)
-    if sortKey == 'itemID':
-        combinedItems.sort(key=lambda x: x.itemID)
-    if sortKey == 'data3':
-        combinedItems.sort(key=lambda x: x.data3)
-    if sortKey == 'data4':
-        combinedItems.sort(key=lambda x: x.data4)
-    if sortKey == 'maxStackSize':
-        combinedItems.sort(key=lambda x: x.maxStackSize)
-    if sortKey == 'maxItemCount':
-        combinedItems.sort(key=lambda x: x.maxItemCount)
-    if sortKey == 'data7':
-        combinedItems.sort(key=lambda x: x.data7)
-    if sortKey == 'data11':
-        combinedItems.sort(key=lambda x: x.data11)
-    return combinedItems
-
-
+    return allNames
