@@ -15,30 +15,31 @@ If you have suggestions on future features, or comments on how the code is laid 
 Also, if you'd like to build this app yourself, all you need to do is run 'DC2ItemEditor.py' in a Python environment with the other two files 'DC2ItemGUI.py' and 'ItemDataReader.py' in the same folder and it should compile normally!
 
 
+
 ######################################################################
 
-KNOWN BUGS:
-- Backups don't work under Windows :(  It's probably something relating to permissions, but I haven't looked into it yet, so ¯\_(ツ)_/¯
-- There's probably plenty more lol
+Version 1.2: 
+
+- Fixed a bug that caused the backup files to fail to save on Windows (forgot to check which characters were illegal in Windows file names, whoops)
+
+- Added better handlers for open files, now it will let you know if it can't find the files at the given directory and prompt you to try again
+
+- Program now checks to make sure text fields are only integers for the respective fields that require that
 
 ######################################################################
 
 
 TO-DO:
 
-- Add better handlers for when the app is given incorrect files, right now it just fails to load and I think just crashes, so I'd like to eventually have a try-except section to better protect against that situation
-
 - I think when the app loads, if you try interacting with the editing menu before you select an item, it throws an error, but still continues running, so I need to eventually catch it
 
 - I'd like to change the way the Save and Discard Changes buttons work so that you can only interact with them after you've made changes to be saved or discarded
-
-- Refactor all the code around setting the GUI fields into simpler functions, because right now it's a MESS, and shouldn't require that many lines of code
 
 - Maybe allow you to select the sprite sheet, and display the sprite of the item alongside the rest of the variables?
 
 - Add more information on what the variables do, perhaps with tooltips when the user hovers over each field?
 
-- Implement a '+' button to add a new item to the game! This would allow you to add items back in (at least to the debug menu), ESPECIALLY if they still have their name in the game, such as a Macho Sword!
+- Implement a '+' button to add a new item to the game! This would allow you to add items back in (at least to the debug menu), ESPECIALLY if they still have their name in the game, such as the Macho Sword!
 
 - Add all weapon stats, ridepod part stats, and more!
 	
