@@ -1,25 +1,31 @@
-from ItemDataReader import ItemDataFileHandler, ItemNameFileHandler,  \
-	findItemName, saveItemEdit, ItemData, saveItemName, findItem, checkBackupFolder, saveFiles, checkIfFilesExist, checkDataTypes
+from ItemDataReader import ItemDataFileHandler, saveItemEdit, ItemData, findItem, checkItemDataTypes
+from ItemNameDataReader import ItemNameFileHandler, findItemName, saveItemName
+from BackupHandler import checkIfFilesExist, checkBackupFolder
+from AppSettingsHandler import getWorkingDirectory, getSettingsDirectory
+from DataDisplay import DataDisplay
+from DataHelperFunctions import setTextField
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox
 from pathlib import Path
+import tkinter.ttk
+
 
 home = str(Path.home())
 
 
-class DarkCloud2ItemDataDisplay:
-	def __init__(self, master):
-		self.master = master
-		master.title('Dark Cloud 2 Item Modifier')
+class DarkCloud2ItemDataDisplay(DataDisplay):
+	def __init__(self):
+		newWindow = tkinter.Toplevel()
+		newWindow.title('Dark Cloud 2 Item Modifier')
 
 		Height = 500
 		Width = 500
 
-		self.canvas = tkinter.Canvas(master, height=Height, width=Width)
+		self.canvas = tkinter.Canvas(newWindow, height=Height, width=Width)
 		self.canvas.pack()
 
-		self.frame = tkinter.Frame(master)
+		self.frame = tkinter.Frame(newWindow)
 		self.frame.place(relx=0.025, rely=0.025, relwidth=0.95, relheight=0.95)
 
 		self.itemScrollbar = tkinter.Scrollbar(self.frame)
@@ -29,11 +35,11 @@ class DarkCloud2ItemDataDisplay:
 
 		self.itemListbox.place(relx=0.07, rely=0.05, relwidth=0.40, relheight=0.20)
 
-		self.saveButton = tkinter.Button(self.frame, text="Save Changes", command=self.addChangedData)
-		self.saveButton.place(relx=0.61, rely=0.07, relwidth=0.3, relheight=0.07)
+		self.saveButton = tkinter.Button(self.frame, text="Save Changes", command=self.saveData)
+		self.saveButton.place(relx=0.61, rely=0.07, relwidth=0.3, relheight=0.05)
 
 		self.discardButton = tkinter.Button(self.frame, text="Discard Changes", command=self.discardChanges)
-		self.discardButton.place(relx=0.61, rely=0.16, relwidth=0.3, relheight=0.07)
+		self.discardButton.place(relx=0.61, rely=0.16, relwidth=0.3, relheight=0.05)
 
 		self.itemIDLabel = tkinter.Label(self.frame, text='ID:')
 		self.itemIDLabel.place(relx=0.10, rely=0.30)
@@ -93,109 +99,85 @@ class DarkCloud2ItemDataDisplay:
 		self.data11TextField = tkinter.Entry(self.frame)
 		self.data11TextField.place(relx=0.57, rely=0.80, relwidth=0.10, relheight=0.055)
 
-		self.workingDirectory = tkinter.filedialog.askdirectory(parent=master, initialdir=home,
-		                                                        title='Please select the folder that contains the comdat.cfg and comdatmes1.cfg files.')
+		self.workingDirectory = getWorkingDirectory(newWindow)
 
-		self.comdatFileLocation = self.workingDirectory + '/comdat.cfg'
-		self.comdatmes1FileLocation = self.workingDirectory + '/comdatmes1.cfg'
+		self.ItemDataFile = ItemDataFileHandler(self.workingDirectory)
+		self.ItemNameFile = ItemNameFileHandler(self.workingDirectory)
 
-		while(checkIfFilesExist(self.comdatFileLocation, self.comdatmes1FileLocation) == False):
-			if (self.workingDirectory == ''):
-				exit()
-			tkinter.messagebox.showinfo("Error reading files", "Unable to locate files at given folder")
-			self.workingDirectory = tkinter.filedialog.askdirectory(initialdir=home,
-			                                                        title='Please select the folder that contains the comdat.cfg and comdatmes1.cfg files.')
-			if(self.workingDirectory == ''):
-				exit()
-
-			self.comdatFileLocation = self.workingDirectory + '/comdat.cfg'
-			self.comdatmes1FileLocation = self.workingDirectory + '/comdatmes1.cfg'
-
-		self.AllItemData = ItemDataFileHandler(self.comdatFileLocation).readFromFile()
-		self.AllItemNames = ItemNameFileHandler(self.comdatmes1FileLocation).readFromFile()
+		self.AllItemData = self.ItemDataFile.readFromFile()
+		self.AllItemNames = self.ItemNameFile.readFromFile()
 
 		self.populateListbox(self.AllItemData)
 
-		checkBackupFolder(self.workingDirectory)
+		self.appSettingsDirectory = getSettingsDirectory()
+		checkBackupFolder(self.appSettingsDirectory)
 
-		saveFiles(self.workingDirectory, self.AllItemNames, self.AllItemData, backup=True)
 
-		self.itemListbox.bind('<<ListboxSelect>>', lambda listbox: self.setAllFields(listbox = True))
+		self.ItemDataFile.backupFile(self.AllItemData)
+		self.ItemNameFile.backupFile(self.AllItemNames)
+
+
+		self.itemListbox.bind('<<ListboxSelect>>', lambda listbox: self.setAllFields(listbox=True))
 
 		self.itemScrollbar.config(command=self.itemListbox.yview)
 
-
-	def getCurrentItemSelected(self):
-		itemSelected = self.itemListbox.curselection()[0]
-		currentItemData = self.AllItemData[itemSelected]
-		return currentItemData
-
-	def getLastItemData(self):
-		currentItem = int(self.itemIDTextField.get())
-		currentItemData = findItem(currentItem, self.AllItemData)
-		return currentItemData
-
-
-	def setAllFields(self, listbox):
-
-		if listbox == True:
-			currentItemData = self.getCurrentItemSelected()
-		else:
-			currentItemData = self.getLastItemData()
-
-		self.itemIDTextField.config(state='normal')
-		self.itemIDTextField.delete(0, 'end')
-		self.itemIDTextField.insert(0, str(currentItemData.itemID))
-		self.itemIDTextField.config(state='readonly')
-		self.nameTextField.delete(0, 'end')
-		self.nameTextField.insert(0, str(findItemName(currentItemData.itemID, self.AllItemNames)))
-		self.typeTextField.delete(0, 'end')
-		self.typeTextField.insert(0, str(currentItemData.itemType))
-		self.data3TextField.delete(0, 'end')
-		self.data3TextField.insert(0, str(currentItemData.data3))
-
-		if currentItemData.data4 == 0:
-			self.noRadioButton.invoke()
-		else:
-			self.yesRadioButton.invoke()
-
-		self.data7TextField.delete(0, 'end')
-		self.data7TextField.insert(0, str(currentItemData.data7))
-		self.spriteIDTextField.delete(0, 'end')
-		self.spriteIDTextField.insert(0, str(currentItemData.spriteIndex))
-		self.stackSizeTextField.delete(0, 'end')
-		self.stackSizeTextField.insert(0, str(currentItemData.maxStackSize))
-		self.totalItemsTextField.delete(0, 'end')
-		self.totalItemsTextField.insert(0, str(currentItemData.maxItemCount))
-		self.modelTextField.delete(0, 'end')
-		self.modelTextField.insert(0, str(currentItemData.itemModelName))
-		self.data11TextField.delete(0, 'end')
-		self.data11TextField.insert(0, str(currentItemData.data11))
-
-	def getItemDataFromFields(self):
-		changedItemData = [self.itemIDTextField.get(), self.typeTextField.get(), self.data3TextField.get(),
-		                   self.hotbar.get(), self.stackSizeTextField.get(), self.totalItemsTextField.get(), self.data7TextField.get(),
-		                   self.spriteIDTextField.get(), self.itemIDTextField.get(), self.modelTextField.get(),
-		                   self.data11TextField.get()]
-		return changedItemData
-
+	def getCurrentDataSelected(self):
+		if str(self.itemListbox.curselection()) != '()':
+			itemSelected = self.itemListbox.curselection()[0]
+			currentItemData = self.AllItemData[itemSelected]
+			return currentItemData
 
 	def populateListbox(self, allItems):
 		for x in range(len(allItems)):
 			self.itemListbox.insert(x, "  " + str(allItems[x].itemID) + ": " + str(
 				findItemName(allItems[x].itemID, self.AllItemNames)))
 
+	def setAllFields(self, listbox):
 
+		if (listbox == True):
+			currentItemData = self.getCurrentDataSelected()
+			if currentItemData is None:
+				# Sometimes listbox says you've clicked it when you definitely haven't
+				return
+		else:
+			currentItemData = self.getLastItemData()
 
+		setTextField(self.itemIDTextField, currentItemData.itemID)
+		setTextField(self.nameTextField, findItemName(currentItemData.itemID, self.AllItemNames))
+		setTextField(self.typeTextField, currentItemData.itemType)
+		setTextField(self.data3TextField, currentItemData.data3)
 
-	def addChangedData(self):
-		changedItemData = self.getItemDataFromFields()
+		if currentItemData.data4 == 0:
+			self.noRadioButton.invoke()
+		else:
+			self.yesRadioButton.invoke()
 
-		if checkDataTypes(changedItemData) == True:
+		setTextField(self.data7TextField, currentItemData.data7)
+		setTextField(self.spriteIDTextField, currentItemData.spriteIndex)
+		setTextField(self.stackSizeTextField, currentItemData.maxStackSize)
+		setTextField(self.totalItemsTextField, currentItemData.maxItemCount)
+		setTextField(self.modelTextField, currentItemData.itemModelName)
+		setTextField(self.data11TextField, currentItemData.data11)
+
+	def getDataFromFields(self):
+		changedItemData = [self.itemIDTextField.get(), self.typeTextField.get(), self.data3TextField.get(),
+						   self.hotbar.get(), self.stackSizeTextField.get(), self.totalItemsTextField.get(),
+						   self.data7TextField.get(),
+						   self.spriteIDTextField.get(), self.itemIDTextField.get(), self.modelTextField.get(),
+						   self.data11TextField.get()]
+		return changedItemData
+
+	def saveData(self):
+		changedItemData = self.getDataFromFields()
+
+		if checkItemDataTypes(changedItemData) == True:
 			changedItem = ItemData(changedItemData)
 			self.AllItemData = saveItemEdit(changedItem, self.AllItemData)
 			self.AllItemNames = saveItemName(self.nameTextField.get(), self.AllItemNames, changedItem.itemID)
-			saveFiles(self.workingDirectory, self.AllItemNames, self.AllItemData, backup=False)
+
+			self.ItemNameFile.writeToFile(self.AllItemNames)
+			self.ItemDataFile.writeToFile(self.AllItemData)
+
 			self.itemListbox.delete(0, self.itemListbox.size())
 			self.populateListbox(self.AllItemData)
 			self.itemListbox.see(changedItem.itemID)
@@ -203,10 +185,10 @@ class DarkCloud2ItemDataDisplay:
 		else:
 			self.discardChanges()
 			tkinter.messagebox.showinfo("Error saving data",
-			                            "All fields besides the item and model names must be in an integer format")
+										"All fields besides the item and model names must be in an integer format")
 
-
-
-	def discardChanges(self):
-		self.setAllFields(False)
+	def getLastItemData(self):
+		currentItem = int(self.itemIDTextField.get())
+		currentItemData = findItem(currentItem, self.AllItemData)
+		return currentItemData
 
