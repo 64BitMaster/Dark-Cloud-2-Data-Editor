@@ -22,6 +22,11 @@ Version 2.0:
 
 - Main Menu now has a section for opening the backup folders and changing the directory you pull the data from
 
+
+Version 2.1:
+
+- Fixed some bugs with the ridepod weapon and leg part, whoopsies
+
 ######################################################################
 
 
