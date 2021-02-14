@@ -35,7 +35,7 @@ class ridepodWeaponData:
 		self.modelName = str(itemData[16])
 
 	def returnWeaponData(self):
-		return str(self.itemID) + ',' + str(self.partType) + ',' + str(self.capacity) + ',' + str(self.data4) + ',' + str(self.hitPoints) + ',' + str(self.durable) + ',' + str(self.attack) + ',' + str(self.flame) + ',' + str(self.chill) + ',' + str(self.lightning) + ',' + str(self.cyclone) + ',' + str(self.smash) + ',' + str(self.exorcism) + ',' + str(self.beast) + ',' + str(self.scale) + ',' + str(self.data14) + ',"' + str(self.modelName) + '"'
+		return str(self.itemID) + ',' + str(self.partType) + ',' + str(self.capacity) + ',' + str(self.data4) + ',' + str(self.hitPoints) + ',' + str(self.attack) + ',' + str(self.durable) + ',' + str(self.flame) + ',' + str(self.chill) + ',' + str(self.lightning) + ',' + str(self.cyclone) + ',' + str(self.smash) + ',' + str(self.exorcism) + ',' + str(self.beast) + ',' + str(self.scale) + ',' + str(self.data14) + ',"' + str(self.modelName) + '"'
 
 
 class ridepodLegData:
@@ -45,9 +45,10 @@ class ridepodLegData:
 		self.capacity = int(itemData[2])
 		self.data4 = int(itemData[3])
 		self.data5 = int(itemData[4])
+		self.data6 = int(itemData[5])
 
 	def returnLegData(self):
-		return str(self.itemID) + ',' + str(self.partType) + ',' + str(self.capacity) + ',' + str(self.data4) + ',' + str(self.data5)
+		return str(self.itemID) + ',' + str(self.partType) + ',' + str(self.capacity) + ',' + str(self.data4) + ',' + str(self.data5) + ',' + str(self.data6)
 
 
 class ridepodEnergyPackData:

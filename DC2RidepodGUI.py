@@ -173,6 +173,11 @@ class DarkCloud2RidepodDisplay(DataDisplay):
 		self.ridepodPartdata5TextField = tkinter.Entry(self.ridepodLegFrame)
 		self.ridepodPartdata5TextField.place(relx=0.23, rely=0.035, relwidth=0.12)
 
+		self.ridepodPartdata6Label = tkinter.Label(self.ridepodLegFrame, text='data6: ')
+		self.ridepodPartdata6Label.place(relx=0.55, rely=0.036)
+		self.ridepodPartdata6TextField = tkinter.Entry(self.ridepodLegFrame)
+		self.ridepodPartdata6TextField.place(relx=0.65, rely=0.035, relwidth=0.12)
+
 
 
 		self.ridepodEnergyPackFrame = tkinter.Frame(newWindow)
@@ -269,6 +274,7 @@ class DarkCloud2RidepodDisplay(DataDisplay):
 
 		elif (newRidepodPartType == 'leg'):
 			setTextField(self.ridepodPartdata5TextField, currentRidepodPart.data5)
+			setTextField(self.ridepodPartdata6TextField, currentRidepodPart.data6)
 			self.ridepodLegFrame.place(relx=0.025, rely=0.5, relwidth=0.95, relheight=0.40)
 
 
@@ -287,11 +293,13 @@ class DarkCloud2RidepodDisplay(DataDisplay):
 			fullChangedPartData = ridepodBodyData(mainChangedPartData + changedBodyData)
 
 		elif currentRidepodPartType == 'weapon':
-			changedWeaponData = [self.hitPointsTextField.get(), self.AttackTextField.get(), self.DurableTextField.get(), self.FlameTextField.get(), self.ChillTextField.get(), self.LightningTextField.get(), self.ChillTextField.get(), self.SmashTextField.get(), self. ExorcismTextField.get(), self.BeastTextField.get(), self.ScaleTextField.get(), self.data14TextField.get(), self.weaponModelNameTextField.get()]
+			changedWeaponData = [self.hitPointsTextField.get(), self.AttackTextField.get(), self.DurableTextField.get(), self.FlameTextField.get(), self.ChillTextField.get(), self.LightningTextField.get(), self.CycloneTextField.get(), self.SmashTextField.get(), self. ExorcismTextField.get(), self.BeastTextField.get(), self.ScaleTextField.get(), self.data14TextField.get(), self.weaponModelNameTextField.get()]
 			fullChangedPartData = ridepodWeaponData(mainChangedPartData + changedWeaponData)
+			#print("Attack: " + str(fullChangedPartData.attack))
+			#print("Durable: " + str(fullChangedPartData.durable))
 
 		elif currentRidepodPartType == 'leg':
-			changedLegData = [self.ridepodPartdata5TextField.get()]
+			changedLegData = [self.ridepodPartdata5TextField.get(), self.ridepodPartdata6TextField.get()]
 			fullChangedPartData = ridepodLegData(mainChangedPartData + changedLegData)
 
 		else:
@@ -306,6 +314,7 @@ class DarkCloud2RidepodDisplay(DataDisplay):
 
 		self.AllRidepodData[self.currentListboxIndex] = changedData
 		self.RidepodDataFile.writeToFile(self.AllRidepodData)
+
 		self.ridepodPartListbox.delete(0,self.ridepodPartListbox.size())
 		self.populateListbox(self.AllRidepodData)
 		self.ridepodPartListbox.see(self.currentListboxIndex)
